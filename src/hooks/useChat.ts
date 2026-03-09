@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { api } from '../api/endpoints';  // ← импортируем API
 import type { Message, Source, AgentType } from '../types/agent.types';
-import { useAgentStatus } from './useAgentStatus';  // новый импорт
+import { useAgentStatus } from './useAgentStatus';
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -12,7 +13,7 @@ export const useChat = () => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const { status, startAgent, stopAgent } = useAgentStatus();  // добавляем статусы
+  const { status, startAgent, stopAgent } = useAgentStatus();
 
   const addMessage = (sender: 'user' | 'bot', text: string, sources?: Source[]) => {
     const newMessage: Message = {
@@ -31,32 +32,32 @@ export const useChat = () => {
     // Добавляем сообщение пользователя
     addMessage('user', question);
     
-    // Запускаем нужного агента
+    // Показываем индикатор загрузки
     setIsLoading(true);
     startAgent(agentType);
-    
-    // Пока имитируем ответ через секунду
-    setTimeout(() => {
-      const testSources = [
-        {
-          text: 'Согласно технической документации ГОСТ 1234-2020, допустимые параметры работы оборудования составляют от -20°C до +50°C при влажности не более 80%.',
-          score: 0.95
-        },
-        {
-          text: 'В разделе 3.2 инструкции по эксплуатации указано, что при температурах ниже -10°C рекомендуется использовать предварительный прогрев в течение 15 минут.',
-          score: 0.82
-        }
-      ];
 
-      addMessage('bot', 
-        'На основе технической документации, оборудование может работать при температурах от -20°C до +50°C.',
-        testSources
-      );
+    try {
+      // 🔥 РЕАЛЬНЫЙ ВЫЗОВ API
+      const response = await api.sendMessage({
+        message: question,
+        agent_type: agentType,
+        threshold: 0.5, // позже возьмем из слайдера
+      });
+
+      // Добавляем ответ бота
+      addMessage('bot', response.answer, response.sources);
       
-      // Останавливаем агента
+    } catch (error) {
+      console.error('Ошибка при отправке сообщения:', error);
+      
+      // Показываем сообщение об ошибке
+      addMessage('bot', 
+        'Извините, произошла ошибка при обработке запроса. Пожалуйста, попробуйте позже.'
+      );
+    } finally {
       setIsLoading(false);
       stopAgent();
-    }, 2000);
+    }
   };
 
   const resetChat = () => {
@@ -68,13 +69,13 @@ export const useChat = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
-    stopAgent(); // сбрасываем статус при очистке чата
+    stopAgent();
   };
 
   return {
     messages,
     isLoading,
-    agentStatus: status,  // добавляем статус в возвращаемые значения
+    agentStatus: status,
     sendMessage,
     resetChat,
   };

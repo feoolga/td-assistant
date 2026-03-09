@@ -26,3 +26,15 @@ export type AgentStatus = {
   message: string;
   isLoading: boolean;
 }
+
+// Типы для API запросов
+export type ChatRequest = {
+  message: string;
+  agent_type: AgentType;
+  threshold: number;
+}
+
+export type ChatResponse = {
+  answer: string;
+  sources: Source[];
+}
