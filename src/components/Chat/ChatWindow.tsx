@@ -11,16 +11,17 @@
 import { useEffect, useRef } from 'react';
 import MessageInput from './MessageInput';
 import SourcesList from './SourcesList';
-import type { Message, AgentStatus } from '../../types/agent.types';
+import type { Message, LoadingStatus } from '../../types/agent.types';
 
 interface ChatWindowProps {
   messages: Message[];
   isLoading: boolean;
-  agentStatus?: AgentStatus;
+  loadingStatus?: LoadingStatus;
   onSendMessage: (message: string) => void;
+  onSendFile: (file: File, question?: string) => void;
 }
 
-const ChatWindow = ({ messages, isLoading, agentStatus, onSendMessage }: ChatWindowProps) => {
+const ChatWindow = ({ messages, isLoading, loadingStatus, onSendMessage, onSendFile }: ChatWindowProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Автоскролл к последнему сообщению
@@ -77,7 +78,7 @@ const ChatWindow = ({ messages, isLoading, agentStatus, onSendMessage }: ChatWin
         ))}
         
         {/* Индикатор работы агента */}
-        {isLoading && agentStatus && (
+        {isLoading && loadingStatus && (
           <div className="flex items-start gap-3">
             <div className="bg-gray-100 p-2 rounded-full">
               <i className="fas fa-robot text-gray-600"></i>
@@ -90,7 +91,7 @@ const ChatWindow = ({ messages, isLoading, agentStatus, onSendMessage }: ChatWin
                     <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                     <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                   </div>
-                  <span>{agentStatus.message}</span>
+                  <span>{loadingStatus.message}</span>
                 </div>
               </div>
             </div>
@@ -102,7 +103,11 @@ const ChatWindow = ({ messages, isLoading, agentStatus, onSendMessage }: ChatWin
       </div>
 
       {/* Поле ввода */}
-      <MessageInput onSendMessage={onSendMessage} disabled={isLoading} />
+      <MessageInput
+        onSendMessage={onSendMessage}
+        onSendFile={onSendFile}
+        disabled={isLoading}
+      />
     </div>
   );
 };

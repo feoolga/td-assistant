@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { api } from '../api/endpoints';
-import type { Message, Source, AgentType } from '../types/agent.types';
+import type { Message, Source } from '../types/agent.types';
 import { useAgentStatus } from './useAgentStatus';
 
-// Добавляем параметр threshold в хук
 export const useChat = (initialThreshold: number = 50) => {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -14,7 +13,7 @@ export const useChat = (initialThreshold: number = 50) => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const { status, startAgent, stopAgent } = useAgentStatus();
+  const { status, startLoading, stopLoading } = useAgentStatus();
 
   const addMessage = (sender: 'user' | 'bot', text: string, sources?: Source[]) => {
     const newMessage: Message = {
@@ -27,22 +26,20 @@ export const useChat = (initialThreshold: number = 50) => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
-  // Теперь sendMessage принимает вопрос и тип агента
-  const sendMessage = async (question: string, agentType: AgentType = 'rag') => {
+  // Отправка текстового сообщения
+  const sendMessage = async (question: string) => {
     if (!question.trim()) return;
 
     // Добавляем сообщение пользователя
     addMessage('user', question);
     
     setIsLoading(true);
-    startAgent(agentType);
+    startLoading('text');
 
     try {
-      // 🔥 ИСПОЛЬЗУЕМ threshold из параметров хука
       const response = await api.sendMessage({
         message: question,
-        agent_type: agentType,
-        threshold: initialThreshold / 100, // конвертируем проценты в 0-1
+        threshold: initialThreshold / 100,
       });
 
       addMessage('bot', response.answer, response.sources);
@@ -54,7 +51,51 @@ export const useChat = (initialThreshold: number = 50) => {
       );
     } finally {
       setIsLoading(false);
-      stopAgent();
+      stopLoading();
+    }
+  };
+
+  // Отправка изображения
+  const sendImage = async (file: File, question: string = 'Что на этом изображении?') => {
+    // Добавляем сообщение пользователя с пометкой, что это изображение
+    addMessage('user', `🖼️ ${question}`);
+    
+    setIsLoading(true);
+    startLoading('image');
+
+    try {
+      const response = await api.analyzeImage(file, question, initialThreshold / 100);
+      addMessage('bot', response.answer, response.sources);
+    } catch (error) {
+      console.error('Ошибка при анализе изображения:', error);
+      addMessage('bot', 
+        'Извините, не удалось проанализировать изображение. Пожалуйста, попробуйте другое фото или проверьте формат файла.'
+      );
+    } finally {
+      setIsLoading(false);
+      stopLoading();
+    }
+  };
+
+  // Отправка голосового сообщения
+  const sendVoice = async (audioBlob: Blob) => {
+    // Добавляем сообщение пользователя с пометкой, что это голос
+    addMessage('user', '🎤 Голосовое сообщение');
+    
+    setIsLoading(true);
+    startLoading('voice');
+
+    try {
+      const response = await api.processVoice(audioBlob, initialThreshold / 100);
+      addMessage('bot', response.answer, response.sources);
+    } catch (error) {
+      console.error('Ошибка при обработке голоса:', error);
+      addMessage('bot', 
+        'Извините, не удалось обработать голосовое сообщение. Пожалуйста, попробуйте еще раз.'
+      );
+    } finally {
+      setIsLoading(false);
+      stopLoading();
     }
   };
 
@@ -67,14 +108,16 @@ export const useChat = (initialThreshold: number = 50) => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
-    stopAgent();
+    stopLoading();
   };
 
   return {
     messages,
     isLoading,
-    agentStatus: status,
+    loadingStatus: status,
     sendMessage,
+    sendImage,
+    sendVoice,
     resetChat,
   };
 };

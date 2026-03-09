@@ -19,10 +19,10 @@ export type Message = {
 }
 
 // Типы для статусов агентов
-export type AgentType = 'rag' | 'vision' | 'web' | 'idle';
+export type LoadingType = 'text' | 'image' | 'voice' | 'idle';
 
-export type AgentStatus = {
-  type: AgentType;
+export type LoadingStatus = {
+  type: LoadingType;
   message: string;
   isLoading: boolean;
 }
@@ -30,8 +30,7 @@ export type AgentStatus = {
 // Типы для API запросов
 export type ChatRequest = {
   message: string;
-  agent_type: AgentType;
-  threshold: number;
+  threshold: number;  // threshold оставляем, это настройка поиска
 }
 
 export type ChatResponse = {

@@ -24,24 +24,32 @@ class ApiClient {
   }
 
   async post<T>(endpoint: string, data: any): Promise<T> {
+    const headers: HeadersInit = {};
+    
+    // Если это не FormData, устанавливаем Content-Type
+    if (!(data instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+    
+    // Если data это объект и не FormData - преобразуем в JSON
+    const body = data instanceof FormData ? data : JSON.stringify(data);
+
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+        method: 'POST',
+        headers,
+        body,
     });
 
     if (!response.ok) {
-      const error: ApiError = {
+        const error: ApiError = {
         message: `HTTP error! status: ${response.status}`,
         status: response.status,
-      };
-      throw error;
+        };
+        throw error;
     }
 
     return response.json();
-  }
+    }
 }
 
 // Создаем и экспортируем единственный экземпляр

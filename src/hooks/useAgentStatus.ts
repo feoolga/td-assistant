@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import type { AgentType, AgentStatus } from '../types/agent.types';
+import type { LoadingType, LoadingStatus } from '../types/agent.types';  // ← новые имена
 
 export const useAgentStatus = () => {
-  const [status, setStatus] = useState<AgentStatus>({
+  const [status, setStatus] = useState<LoadingStatus>({
     type: 'idle',
     message: '',
     isLoading: false
   });
 
-  const startAgent = (type: AgentType, customMessage?: string) => {
+  // Теперь эта функция только для UI, никак не связана с бэком
+  const startLoading = (type: LoadingType, customMessage?: string) => {
     const messages = {
-      rag: 'Ищу информацию в технической документации...',
-      vision: 'Анализирую загруженное изображение...',
-      web: 'Проверяю открытые источники...',
+      text: 'Ищу информацию в технической документации...',
+      image: 'Анализирую изображение...',
+      voice: 'Обрабатываю голосовое сообщение...',
       idle: ''
     };
 
@@ -23,7 +24,7 @@ export const useAgentStatus = () => {
     });
   };
 
-  const stopAgent = () => {
+  const stopLoading = () => {
     setStatus({
       type: 'idle',
       message: '',
@@ -33,7 +34,7 @@ export const useAgentStatus = () => {
 
   return {
     status,
-    startAgent,
-    stopAgent
+    startLoading,  // ← переименовали
+    stopLoading    // ← переименовали
   };
 };
