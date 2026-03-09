@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { api } from '../api/endpoints';  // ← импортируем API
+import { api } from '../api/endpoints';
 import type { Message, Source, AgentType } from '../types/agent.types';
 import { useAgentStatus } from './useAgentStatus';
 
-export const useChat = () => {
+// Добавляем параметр threshold в хук
+export const useChat = (initialThreshold: number = 50) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -26,31 +27,28 @@ export const useChat = () => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
+  // Теперь sendMessage принимает вопрос и тип агента
   const sendMessage = async (question: string, agentType: AgentType = 'rag') => {
     if (!question.trim()) return;
 
     // Добавляем сообщение пользователя
     addMessage('user', question);
     
-    // Показываем индикатор загрузки
     setIsLoading(true);
     startAgent(agentType);
 
     try {
-      // 🔥 РЕАЛЬНЫЙ ВЫЗОВ API
+      // 🔥 ИСПОЛЬЗУЕМ threshold из параметров хука
       const response = await api.sendMessage({
         message: question,
         agent_type: agentType,
-        threshold: 0.5, // позже возьмем из слайдера
+        threshold: initialThreshold / 100, // конвертируем проценты в 0-1
       });
 
-      // Добавляем ответ бота
       addMessage('bot', response.answer, response.sources);
       
     } catch (error) {
       console.error('Ошибка при отправке сообщения:', error);
-      
-      // Показываем сообщение об ошибке
       addMessage('bot', 
         'Извините, произошла ошибка при обработке запроса. Пожалуйста, попробуйте позже.'
       );

@@ -1,4 +1,14 @@
-// Базовые настройки API
+/**
+ * 🚀 API КЛИЕНТ
+ * 
+ * Как использовать:
+ * 1. Создайте файл .env в корне проекта
+ * 2. Укажите там VITE_API_URL = https://ваш-бэкенд.ком
+ * 3. Если .env нет - по умолчанию используется http://localhost:5000
+ * 
+ * Все готово к работе! Эндпоинты описаны в endpoints.ts
+ */
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 interface ApiError {

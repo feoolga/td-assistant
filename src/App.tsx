@@ -5,12 +5,13 @@ import WarningBanner from './components/Layout/WarningBanner';
 import ControlPanel from './components/Controls/ControlPanel';
 import ResetButton from './components/Controls/ResetButton';
 import ChatWindow from './components/Chat/ChatWindow';
-import { useChat } from './hooks/useChat';  // ← импорт хука
+import { useChat } from './hooks/useChat';
 import './styles/index.css';
 
 function App() {
   const [threshold, setThreshold] = useState(50);
-  const { messages, isLoading, agentStatus, sendMessage, resetChat } = useChat();
+  // ✅ Передаем threshold в хук
+  const { messages, isLoading, agentStatus, sendMessage, resetChat } = useChat(threshold);
 
   const handleThresholdChange = (value: number) => {
     setThreshold(value);
@@ -22,7 +23,6 @@ function App() {
     }
   };
 
-  // Считаем вопросы (сообщения от пользователя)
   const questionCount = messages.filter(m => m.sender === 'user').length;
 
   return (
@@ -42,7 +42,7 @@ function App() {
           messages={messages}
           isLoading={isLoading}
           agentStatus={agentStatus}
-          onSendMessage={sendMessage}
+          onSendMessage={sendMessage}  // sendMessage уже знает про threshold!
         />
       </main>
 
