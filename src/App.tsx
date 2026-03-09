@@ -11,7 +11,7 @@ import './styles/index.css';
 function App() {
   const [threshold, setThreshold] = useState(50);
   // ✅ Передаем threshold в хук
-  const { messages, isLoading, loadingStatus, sendMessage, sendImage, resetChat } = useChat(threshold);
+  const { messages, isLoading, loadingStatus, sendMessage, sendImage, sendVoice, resetChat } = useChat(threshold);
 
   const handleThresholdChange = (value: number) => {
     setThreshold(value);
@@ -44,6 +44,7 @@ function App() {
           loadingStatus={loadingStatus}
           onSendMessage={sendMessage}
           onSendFile={sendImage}
+          onSendVoice={sendVoice}
         />
       </main>
 

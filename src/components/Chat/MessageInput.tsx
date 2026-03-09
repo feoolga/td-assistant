@@ -11,11 +11,12 @@ import AttachButton from '../Inputs/AttachButton';
 
 interface MessageInputProps {
   onSendMessage: (message: string) => void;
-  onSendFile?: (file: File) => void;  // новый пропс для отправки файлов
+  onSendFile?: (file: File) => void;
+  onSendVoice?: (audioBlob: Blob) => void;
   disabled?: boolean;
 }
 
-const MessageInput = ({ onSendMessage, onSendFile, disabled = false }: MessageInputProps) => {
+const MessageInput = ({ onSendMessage, onSendFile, onSendVoice, disabled = false }: MessageInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -30,7 +31,10 @@ const MessageInput = ({ onSendMessage, onSendFile, disabled = false }: MessageIn
   };
 
   const handleRecordingComplete = (audioBlob: Blob) => {
-    console.log('Запись готова, размер:', audioBlob.size);
+    // Отправляем голос на сервер, если есть функция
+    if (onSendVoice) {
+      onSendVoice(audioBlob);
+    }
     setIsRecording(false);
   };
 

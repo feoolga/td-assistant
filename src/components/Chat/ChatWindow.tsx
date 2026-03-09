@@ -19,9 +19,10 @@ interface ChatWindowProps {
   loadingStatus?: LoadingStatus;
   onSendMessage: (message: string) => void;
   onSendFile: (file: File, question?: string) => void;
+  onSendVoice?: (audioBlob: Blob) => void;
 }
 
-const ChatWindow = ({ messages, isLoading, loadingStatus, onSendMessage, onSendFile }: ChatWindowProps) => {
+const ChatWindow = ({ messages, isLoading, loadingStatus, onSendMessage, onSendFile, onSendVoice }: ChatWindowProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Автоскролл к последнему сообщению
@@ -106,6 +107,7 @@ const ChatWindow = ({ messages, isLoading, loadingStatus, onSendMessage, onSendF
       <MessageInput
         onSendMessage={onSendMessage}
         onSendFile={onSendFile}
+        onSendVoice={onSendVoice}
         disabled={isLoading}
       />
     </div>
