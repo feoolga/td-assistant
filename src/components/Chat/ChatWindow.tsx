@@ -9,17 +9,18 @@
 // =============================================
 
 import { useEffect, useRef } from 'react';
-import type { Message } from '../../types/agent.types';
 import MessageInput from './MessageInput';
 import SourcesList from './SourcesList';
+import type { Message, AgentStatus } from '../../types/agent.types';
 
 interface ChatWindowProps {
   messages: Message[];
   isLoading: boolean;
+  agentStatus?: AgentStatus;
   onSendMessage: (message: string) => void;
 }
 
-const ChatWindow = ({ messages, isLoading, onSendMessage }: ChatWindowProps) => {
+const ChatWindow = ({ messages, isLoading, agentStatus, onSendMessage }: ChatWindowProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Автоскролл к последнему сообщению
@@ -75,8 +76,8 @@ const ChatWindow = ({ messages, isLoading, onSendMessage }: ChatWindowProps) => 
           </div>
         ))}
         
-        {/* Индикатор печатания */}
-        {isLoading && (
+        {/* Индикатор работы агента */}
+        {isLoading && agentStatus && (
           <div className="flex items-start gap-3">
             <div className="bg-gray-100 p-2 rounded-full">
               <i className="fas fa-robot text-gray-600"></i>
@@ -89,7 +90,7 @@ const ChatWindow = ({ messages, isLoading, onSendMessage }: ChatWindowProps) => 
                     <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                     <div className="h-2 w-2 bg-gray-400 rounded-full"></div>
                   </div>
-                  <span>Ищу информацию в технической документации...</span>
+                  <span>{agentStatus.message}</span>
                 </div>
               </div>
             </div>

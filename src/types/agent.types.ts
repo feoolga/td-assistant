@@ -17,3 +17,12 @@ export type Message = {
   sources?: Source[];
   timestamp: string;
 }
+
+// Типы для статусов агентов
+export type AgentType = 'rag' | 'vision' | 'web' | 'idle';
+
+export type AgentStatus = {
+  type: AgentType;
+  message: string;
+  isLoading: boolean;
+}

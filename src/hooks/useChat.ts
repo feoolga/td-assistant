@@ -1,11 +1,6 @@
-// =============================================
-// Хук: useChat
-// Путь: src/hooks/useChat.ts
-// Назначение: Управление состоянием чата
-// =============================================
-
 import { useState } from 'react';
-import type { Message, Source } from '../types/agent.types';
+import type { Message, Source, AgentType } from '../types/agent.types';
+import { useAgentStatus } from './useAgentStatus';  // новый импорт
 
 export const useChat = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -17,6 +12,7 @@ export const useChat = () => {
     },
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const { status, startAgent, stopAgent } = useAgentStatus();  // добавляем статусы
 
   const addMessage = (sender: 'user' | 'bot', text: string, sources?: Source[]) => {
     const newMessage: Message = {
@@ -29,18 +25,18 @@ export const useChat = () => {
     setMessages((prev) => [...prev, newMessage]);
   };
 
-  const sendMessage = async (question: string) => {
+  const sendMessage = async (question: string, agentType: AgentType = 'rag') => {
     if (!question.trim()) return;
 
     // Добавляем сообщение пользователя
     addMessage('user', question);
     
-    // Здесь позже будет вызов API
+    // Запускаем нужного агента
     setIsLoading(true);
+    startAgent(agentType);
     
-    // Пока имитируем ответ с источниками через секунду
+    // Пока имитируем ответ через секунду
     setTimeout(() => {
-      // Тестовые данные с источниками
       const testSources = [
         {
           text: 'Согласно технической документации ГОСТ 1234-2020, допустимые параметры работы оборудования составляют от -20°C до +50°C при влажности не более 80%.',
@@ -49,18 +45,17 @@ export const useChat = () => {
         {
           text: 'В разделе 3.2 инструкции по эксплуатации указано, что при температурах ниже -10°C рекомендуется использовать предварительный прогрев в течение 15 минут.',
           score: 0.82
-        },
-        {
-          text: 'Технический паспорт изделия, страница 7: "Устройство сохраняет работоспособность при кратковременном (до 1 часа) воздействии температур до -30°C".',
-          score: 0.78
         }
       ];
 
       addMessage('bot', 
-        'На основе технической документации, оборудование может работать при температурах от -20°C до +50°C. При сильных морозах рекомендуется предварительный прогрев.',
-        testSources  // ← передаем источники третьим аргументом
+        'На основе технической документации, оборудование может работать при температурах от -20°C до +50°C.',
+        testSources
       );
+      
+      // Останавливаем агента
       setIsLoading(false);
+      stopAgent();
     }, 2000);
   };
 
@@ -73,11 +68,13 @@ export const useChat = () => {
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       },
     ]);
+    stopAgent(); // сбрасываем статус при очистке чата
   };
 
   return {
     messages,
     isLoading,
+    agentStatus: status,  // добавляем статус в возвращаемые значения
     sendMessage,
     resetChat,
   };

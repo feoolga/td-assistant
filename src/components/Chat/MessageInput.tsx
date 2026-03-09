@@ -80,7 +80,6 @@ const MessageInput = ({ onSendMessage, onSendFile, disabled = false }: MessageIn
               onClick={handleSendFile}
               className="px-3 py-1 bg-cyan-500 text-white rounded-lg text-sm hover:bg-cyan-600"
             >
-              <i className="fas fa-paper-plane mr-1"></i>
               Отправить
             </button>
             <button
