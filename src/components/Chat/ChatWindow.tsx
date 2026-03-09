@@ -11,6 +11,7 @@
 import { useEffect, useRef } from 'react';
 import type { Message } from '../../types/agent.types';
 import MessageInput from './MessageInput';
+import SourcesList from './SourcesList';
 
 interface ChatWindowProps {
   messages: Message[];
@@ -58,6 +59,12 @@ const ChatWindow = ({ messages, isLoading, onSendMessage }: ChatWindowProps) => 
                 <div className="flex-1">
                   <div className="bg-gray-50 border border-cyan-300 rounded-2xl p-4">
                     <p className="text-gray-700 whitespace-pre-wrap">{message.text}</p>
+                    
+                    {/* Добавляем источники, если они есть */}
+                    {message.sources && message.sources.length > 0 && (
+                      <SourcesList sources={message.sources} />
+                    )}
+                    
                     <div className="flex justify-end mt-2">
                       <span className="text-xs text-gray-500">{message.timestamp}</span>
                     </div>
